@@ -8,7 +8,7 @@ __author__ = 'kdxcxs'
 __version__ = '0.1.2'
 
 def getTitles():
-    db_connection = sqlite3.connect('D:\\Codes\\pyTyper\\pyTyper.db')
+    db_connection = sqlite3.connect('pyTyper.db')
     root_cursor = db_connection.cursor()
     listTitles = list(root_cursor.execute('SELECT title FROM itemList;'))
     titleMenu = []
@@ -19,7 +19,7 @@ def getTitles():
 
 def getValue(title):
     try:
-        db_connection = sqlite3.connect('D:\\Codes\\pyTyper\\pyTyper.db')
+        db_connection = sqlite3.connect('pyTyper.db')
         root_cursor = db_connection.cursor()
         value = list(root_cursor.execute('SELECT value FROM itemList WHERE title="{title}";'.format(title=title.replace('\"','\\\"'))))[0][0]
     except BaseException as error: # 捕获所有异常
