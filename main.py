@@ -110,5 +110,4 @@ class TrayIcon(QSystemTrayIcon):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     pyTyperTrayIcon = TrayIcon()
-    typerValueNow = ''           # 当前热键输入的值
     sys.exit(app.exec_())        # exec_()方法的作用是“进入程序的主循环直到exit()被调
