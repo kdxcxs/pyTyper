@@ -60,14 +60,15 @@ class TrayIcon(QSystemTrayIcon):
     def __init__(self, parent=None):
         super(TrayIcon, self).__init__(parent)
         self.setToolTip('pyTyper|'+getTitles()[0]) # 当鼠标悬浮到托盘图标时显示的文本
+        self.valueTyper = TyperValueTyper(self.toolTip)
         self.createMenu()
         self.show()
-        self.valueTyper = TyperValueTyper(self.toolTip)
 
     def createMenu(self):
         self.mainMenu = QMenu()
         self.itemChangingMenu = QMenu('切换')
         self.refreshListAction = QAction('刷新',self,triggered=self.refreshItemList)
+        self.rebindAction = QAction('重新绑定按键',self,triggered=self.rebindKey)
         self.aboutAction = QAction("关于", self,triggered=self.showAbout)
         self.quitAction = QAction("退出", self, triggered=self.quit)
 
@@ -76,6 +77,7 @@ class TrayIcon(QSystemTrayIcon):
         
         self.mainMenu.addMenu(self.itemChangingMenu)
         self.mainMenu.addAction(self.refreshListAction)
+        self.mainMenu.addAction(self.rebindAction)
         self.mainMenu.addAction(self.aboutAction)
         self.mainMenu.addAction(self.quitAction)
         self.setContextMenu(self.mainMenu)
@@ -96,6 +98,10 @@ class TrayIcon(QSystemTrayIcon):
         for title in getTitles():
             self.itemChangingMenu.addAction(TyperChangeItemAction(title,self))
         self.showMsg('刷新成功')
+
+    def rebindKey(self):
+        keyboard.add_hotkey('ctrl+alt+x',self.valueTyper.typeValue)
+        self.showMsg('绑定成功')
 
     def showAbout(self):
         self.aboutWindow.show()
