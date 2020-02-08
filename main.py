@@ -1,4 +1,4 @@
-import sys,sqlite3,keyboard,threading
+import sys,sqlite3,keyboard,threading,pyperclip
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -29,12 +29,25 @@ def getValue(title):
         return value
 
 class TyperValueTyper(object):
-    def __init__(self, titleGetter): # 将titleGetter指向TrayIcon类的toolTip方法从而在快捷键触发时获取当前项目的title
+    def __init__(self, titleGetter, showTrayWarn): # 将titleGetter指向TrayIcon类的toolTip方法从而在快捷键触发时获取当前项目的title
        keyboard.add_hotkey('ctrl+alt+x',self.typeValue)
+       keyboard.add_hotkey('ctrl+alt+v',self.typeClipboard)
        self.titleGetter = titleGetter
+       self.showTrayWarn = showTrayWarn
     
     def typeValue(self):
         threading.Thread(target=keyboard.write(getValue(self.titleGetter()[8:]))).start()
+
+    def checkClipboard(self): # 检测剪切板内容是否在ASCII范围内防止输入时报错
+        try:
+            pyperclip.paste().encode('ascii')
+            return pyperclip.paste()
+        except:
+            self.showTrayWarn('剪切板中含有非ASCII字符,输入失败!')
+            return ''
+
+    def typeClipboard(self):
+        threading.Thread(target=keyboard.write(self.checkClipboard())).start()
 
 class QtTyperAbout(QMainWindow):
     def __init__(self, parent=None):
@@ -60,7 +73,7 @@ class TrayIcon(QSystemTrayIcon):
     def __init__(self, parent=None):
         super(TrayIcon, self).__init__(parent)
         self.setToolTip('pyTyper|'+getTitles()[0]) # 当鼠标悬浮到托盘图标时显示的文本
-        self.valueTyper = TyperValueTyper(self.toolTip)
+        self.valueTyper = TyperValueTyper(self.toolTip,self.showWarn)
         self.createMenu()
         self.show()
 
@@ -101,6 +114,7 @@ class TrayIcon(QSystemTrayIcon):
 
     def rebindKey(self):
         keyboard.add_hotkey('ctrl+alt+x',self.valueTyper.typeValue)
+        keyboard.add_hotkey('ctrl+alt+v',self.valueTyper.typeClipboard)
         self.showMsg('绑定成功')
 
     def showAbout(self):
@@ -108,6 +122,9 @@ class TrayIcon(QSystemTrayIcon):
 
     def showMsg(self,msg):
         self.showMessage("pyTyper", msg, self.icon)
+
+    def showWarn(self,msg):
+        self.showMessage("pyTyper", msg, self.Warning)
 
     def quit(self):
         app.quit()
